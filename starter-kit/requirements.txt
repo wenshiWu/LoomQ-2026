@@ -1,5 +1,3 @@
 # Public evaluator baseline: no third-party dependencies.
-# Add project dependencies below and pin every version exactly, for example:
-# amazon-braket-sdk==<tested-version>
-# spinqit==<tested-version>
-# pyqpanda==<tested-version>
+# Our L1 uses a dependency-free state-vector simulator (quantum_engine.py),
+# so no extra packages are required. L2 uses the standard library + HTTP.
