@@ -65,6 +65,7 @@ _ORIGINQ_GATE = {
     "sdg": "SDAG",
     "t": "T",
     "tdg": "TDAG",
+    "u1": "CU1",
     "rz": "RZ",
     "ry": "RY",
     "cx": "CNOT",
@@ -111,8 +112,10 @@ def transpile_braket(circ: Circuit) -> str:
 def _braket_gate(gate: GateOp) -> str:
     args = ", ".join(_fmt_operand(q) for q in gate.qubits)
     name = gate.name
-    # cu1 == controlled-phase == cp in OpenQASM 3 standard library.
-    if gate.name == "cu1":
+    # u1 == p, cu1 == controlled-p == cp in OpenQASM 3 standard library.
+    if gate.name == "u1":
+        name = "p"
+    elif gate.name == "cu1":
         name = "cp"
     elif gate.name == "swap":
         # swap is not part of stdgates.inc; decompose into 3 cnots.

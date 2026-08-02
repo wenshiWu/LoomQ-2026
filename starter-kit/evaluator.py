@@ -89,6 +89,7 @@ def evaluate_l1(targets: List[str], shots: int) -> List[Dict[str, Any]]:
                 if not isinstance(native, str) or not native.strip():
                     cases.append(result(label, "FAIL", "transpile returned no artifact"))
                     continue
+                # payload = adapter.run(qasm, target, shots)
                 payload = adapter.run(qasm, target, shots)
                 valid, reason = validate_schema(payload)
                 if not valid:

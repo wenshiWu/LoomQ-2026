@@ -251,10 +251,12 @@ def _read_operand(tokens: List[str], i: int) -> Tuple[str, Optional[int], int]:
 _GATE_ARITY = {
     "h": 1,
     "x": 1,
+    "z": 1,
     "s": 1,
     "sdg": 1,
     "t": 1,
     "tdg": 1,
+    "u1": 1,
     "rz": 1,
     "ry": 1,
     "cx": 2,
@@ -300,6 +302,10 @@ class StateVectorSimulator:
                     continue
                 j = base | bit
                 self.state[base], self.state[j] = self.state[j], self.state[base]
+        elif gate.name == "z":
+            for base in range(self.dim):
+                if base & bit:
+                    self.state[base] *= -1.0
         elif gate.name in ("s", "sdg"):
             phase = 1j if gate.name == "s" else -1j
             for base in range(self.dim):
@@ -310,14 +316,24 @@ class StateVectorSimulator:
             for base in range(self.dim):
                 if base & bit:
                     self.state[base] *= phase
-        elif gate.name == "rz":
+        elif gate.name == "u1":
             theta = gate.params[0]
-            phase = _phase(-theta / 2.0)
+            phase = _phase(theta)
             for base in range(self.dim):
                 if base & bit:
                     self.state[base] *= phase
+        elif gate.name == "rz":
+            # Physics convention diag(e^{-i*theta/2}, e^{i*theta/2}):
+            # differs from u1(theta) by a global phase only, and this is the
+            # convention assumed by gate_identities.md section 6 (ry fallback).
+            theta = gate.params[0]
+            phase_lo = _phase(-theta / 2.0)
+            phase_hi = _phase(theta / 2.0)
+            for base in range(self.dim):
+                if base & bit:
+                    self.state[base] *= phase_hi
                 else:
-                    self.state[base] *= cmath.exp(1j * theta / 2.0)
+                    self.state[base] *= phase_lo
         elif gate.name == "ry":
             theta = gate.params[0]
             c = math.cos(theta / 2.0)
